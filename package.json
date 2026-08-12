@@ -49,5 +49,12 @@
     "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0"
+  },
+  "allowScripts": {
+    "@fortawesome/fontawesome-common-types@6.2.1": true,
+    "@fortawesome/fontawesome-svg-core@6.2.1": true,
+    "@fortawesome/free-solid-svg-icons@6.2.1": true,
+    "core-js@3.26.1": true,
+    "core-js-pure@3.26.1": true
   }
 }

@@ -15,8 +15,13 @@ function BookForm({ book, validate }) {
   const [rating, setRating] = useState(0);
 
   const navigate = useNavigate();
+
   const {
-    register, watch, formState, handleSubmit, reset,
+    register,
+    watch,
+    formState,
+    handleSubmit,
+    reset,
   } = useForm({
     defaultValues: useMemo(() => ({
       title: book?.title,
@@ -25,6 +30,7 @@ function BookForm({ book, validate }) {
       genre: book?.genre,
     }), [book]),
   });
+
   useEffect(() => {
     reset(book);
   }, [book]);
@@ -142,4 +148,5 @@ BookForm.defaultProps = {
   book: null,
   validate: null,
 };
+
 export default BookForm;
