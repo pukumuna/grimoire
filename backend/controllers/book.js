@@ -1,5 +1,7 @@
 const Book = require('../models/Book');
 
+const User = require('../models/User');
+
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
 

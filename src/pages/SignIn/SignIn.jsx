@@ -9,6 +9,7 @@ import { ReactComponent as Logo } from '../../images/Logo.svg';
 import styles from './SignIn.module.css';
 
 function SignIn({ setUser }) {
+  console.log('Something went wrong during signing debut 1');
   const navigate = useNavigate();
   const { user, authenticated } = useUser();
   if (user || authenticated) {
@@ -30,18 +31,19 @@ function SignIn({ setUser }) {
           password,
         },
       });
+
       if (!response?.data?.token) {
         setNotification({ error: true, message: 'Une erreur est survenue' });
         console.log('Something went wrong during signing in: ', response);
       } else {
         storeInLocalStorage(response.data.token, response.data.userId);
+        console.log('la requete sest bien passée ');
         setUser(response.data);
         navigate('/');
       }
     } catch (err) {
-      console.log(err);
-      setNotification({ error: true, message: err.message });
-      console.log('Some error occured during signing in: ', err);
+        setNotification({ error: true,  message: err.response?.data?.message || err.message });
+       
     } finally {
       setIsLoading(false);
     }
