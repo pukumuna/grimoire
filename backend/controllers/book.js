@@ -2,6 +2,8 @@ const Book = require('../models/Book');
 
 const User = require('../models/User');
 
+const fs = require('fs'); //fs : file system (pour delete)
+
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
 
@@ -72,6 +74,46 @@ exports.modifyBook = (req, res, next) => {
         .catch(error => { res.status(400).json({ error }); });
     })
     .catch(error => { res.status(400).json({ error }); });
+};
+
+exports.deleteBook = (req, res, next) => {
+  Book.findOne({ _id: req.params.id })
+    .then(book => {
+      // Vérifier que le livre existe
+      if (!book) {
+        return res.status(404).json({
+          message: 'Livre non trouvé'
+        });
+      }
+
+      // Vérifier que l'utilisateur connecté est bien le propriétaire
+      if (book.userId !== req.auth.userId) {
+        return res.status(403).json({
+          message: 'Unauthorized request'
+        });
+      }
+
+      // Récupérer le nom du fichier image depuis imageUrl
+      const filename = book.imageUrl.split('/images/')[1];
+
+      // Supprimer l'image du dossier images
+      fs.unlink(`images/${filename}`, () => {
+        // Supprimer ensuite le livre dans MongoDB
+        Book.deleteOne({ _id: req.params.id })
+          .then(() => {
+            res.status(200).json({
+              message: 'Livre supprimé !'
+            });
+          })
+          .catch(error => {
+            res.status(400).json({ error });
+          });
+      });
+      return null;
+    })
+    .catch(error => {
+      res.status(400).json({ error });
+    });
 };
 
 exports.rateBook = (req, res, next) => {

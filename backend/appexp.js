@@ -1,5 +1,7 @@
 const express = require('express');
 
+const helmet = require('helmet'); // Pour sécuriser davantage en-tête Http
+
 const appexp = express();
 
 const path = require('path');
@@ -69,6 +71,7 @@ app.get('/api/stuff', (req, res, next) => {
 app.use(bodyParser.json()); */
 
 appexp.use('/images', express.static(path.join(__dirname, 'images')));
+appexp.use(helmet());
 appexp.use('/api/books', bookRoutes);
 appexp.use('/api/auth', userRoutes);
 

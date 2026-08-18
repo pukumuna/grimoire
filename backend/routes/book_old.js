@@ -3,10 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const auth = require('../middlewares/auth');
-
-const multer = require('../middlewares/multer'); // load file in memoryStorage
-
-const sharp = require('../middlewares/sharp');  // Compression file off memoryStorage
+const multer = require('../middlewares/multer');
 
 const bookCtrl = require('../controllers/book');
 
@@ -15,9 +12,9 @@ router.get('/bestrating', bookCtrl.getBestRatedBooks);
 router.get('/', bookCtrl.getAllBooks);
 router.get('/:id', bookCtrl.getOneBook);
 
-router.post( '/', auth, multer, sharp, bookCtrl.createBook);
+router.post( '/', auth, multer, bookCtrl.createBook );
 
-router.put( '/:id', auth, multer, sharp, bookCtrl.modifyBook);
+router.put( '/:id', auth, multer, bookCtrl.modifyBook );
 
 router.delete( '/:id', auth, bookCtrl.deleteBook ); 
 

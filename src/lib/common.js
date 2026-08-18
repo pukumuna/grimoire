@@ -1,4 +1,4 @@
-import axios from 'axios';  // Utiliser à la place de fetch
+import axios from 'axios'; /* Utiliser à la place de fetch */ 
 import { API_ROUTES } from '../utils/constants';
 
 function formatBooks(bookArray) {
