@@ -42,8 +42,7 @@ function SignIn({ setUser }) {
         navigate('/');
       }
     } catch (err) {
-        setNotification({ error: true,  message: err.response?.data?.message || err.message });
-       
+      setNotification({ error: true, message: err.response?.data?.message || err.message });
     } finally {
       setIsLoading(false);
     }

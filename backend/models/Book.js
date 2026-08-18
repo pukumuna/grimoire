@@ -7,7 +7,6 @@ const bookSchema = mongoose.Schema({
   imageUrl: { type: String, required: true },       // illustration/couverture du livre
   year: { type: Number, required: true },           // année de publication du livre
   genre: { type: String, required: true },          // genre donné à un livre
-  price: { type: Number, required: true },          // Prix donné à un livre
   ratings: [{ 
     userId: { type: String, required: true },      // userid de celui qui a noté 
     grade: { type: Number, required: true }        // Note donné à un livre 

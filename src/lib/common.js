@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from 'axios';  // Utiliser à la place de fetch
 import { API_ROUTES } from '../utils/constants';
 
 function formatBooks(bookArray) {
@@ -127,6 +127,10 @@ export async function addBook(data) {
     }],
     averageRating: parseInt(data.rating, 10),
   };
+
+  console.log('Data.file =', data.file);
+  console.log('Data.file[0] =', data.file?.[0]);
+  console.log('Est-ce un File ?', data.file?.[0] instanceof File);
   const bodyFormData = new FormData();
   bodyFormData.append('book', JSON.stringify(book));
   bodyFormData.append('image', data.file[0]);
@@ -141,8 +145,10 @@ export async function addBook(data) {
       },
     });
   } catch (err) {
-    console.error(err);
-    return { error: true, message: err.message };
+    /* console.error(err); */
+    console.error('ERREUR AXIOS =', err);
+    console.error('REPONSE BACKEND =', err.response?.data);
+    return { error: true, message: err.response?.data?.message || err.message };
   }
 }
 

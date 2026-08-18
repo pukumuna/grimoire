@@ -18,7 +18,7 @@ router.put( '/:id', auth, multer, bookCtrl.modifyBook );
 
 /*outer.delete( '/:id', auth, bookCtrl.deleteBook ); */
 
-/*router.post( '/:id/rating', auth, bookCtrl.rateBook );*/
+router.post('/:id/rating', auth, bookCtrl.rateBook);
 
 module.exports = router;
 /**
