@@ -4,6 +4,8 @@ const helmet = require('helmet'); // Pour sécuriser davantage en-tête Http
 
 const appexp = express();
 
+require('dotenv').config();
+
 const path = require('path');
 
 const bookRoutes = require('./routes/book');
@@ -12,9 +14,7 @@ const userRoutes = require('./routes/user');
 
 const mongoose = require('mongoose');
 
-mongoose.connect(
-  'mongodb+srv://zolhom13_db_user:sz3J9l0trr2hdwKB@cluster0.oxxutkf.mongodb.net/monvieuxgrimoire?retryWrites=true&w=majority&appName=Cluster0'
-)
+mongoose.connect(process.env.MONGODB_URL)
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch((error) => {
   console.log('Connexion à MongoDB échouée !');
