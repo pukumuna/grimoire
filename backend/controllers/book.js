@@ -128,7 +128,6 @@ exports.rateBook = (req, res, next) => {
 
   Book.findOne({ _id: req.params.id })
     .then(book => {
-
       const alreadyRated = book.ratings.some(
         item => item.userId === userId
       );
