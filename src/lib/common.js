@@ -128,9 +128,6 @@ export async function addBook(data) {
     averageRating: parseInt(data.rating, 10),
   };
 
-  console.log('Data.file =', data.file);
-  console.log('Data.file[0] =', data.file?.[0]);
-  console.log('Est-ce un File ?', data.file?.[0] instanceof File);
   const bodyFormData = new FormData();
   bodyFormData.append('book', JSON.stringify(book));
   bodyFormData.append('image', data.file[0]);
@@ -140,9 +137,7 @@ export async function addBook(data) {
       method: 'post',
       url: `${API_ROUTES.BOOKS}`,
       data: bodyFormData,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
   } catch (err) {
     /* console.error(err); */
