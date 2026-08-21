@@ -8,11 +8,24 @@
 # testing
 /coverage
 
+#Partie Frontend
+src
+public
+node_modules
+.eslintrc.json
+babel-plugin-macros.config.js
+BookRating.docx
+Compression images avec Middlewares.docx
+Dockerfile
+Installation de Node à partir de.docx
+Mecanisme-newBook.docx
+
 # production
 /build
 
 # misc
 .DS_Store
+.env
 .env.local
 .env.development.local
 .env.test.local

@@ -6,23 +6,50 @@ const fs = require('fs'); //fs : file system (pour delete)
 
 const path = require('path');
 
-exports.createBook = (req, res, next) => {
-  const bookObject = JSON.parse(req.body.book);
+exports.createBook = async (req, res, next) => {
+  try {
+    const bookObject = JSON.parse(req.body.book);
 
-  delete bookObject._id;
-  delete bookObject.userId;
+    delete bookObject._id;
 
-  const book = new Book({ ...bookObject, userId: req.auth.userId,
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-    ratings: [], averageRating: 0
-  });
-   
-  book.save()
-    .then (() => { res.status(201).json({ message: 'Livre enregistré !' }); })
-    .catch (error => {
-      
-      res.status(400).json({ error }); 
+    const book = new Book({
+      ...bookObject,
+      userId: req.auth.userId,
+      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+      ratings: [],
+      averageRating: 0
     });
+
+    await book.save();
+
+    return res.status(201).json({
+      message: 'Livre enregistré !'
+    });
+
+  } catch (error) {
+
+    // Si Sharp avait déjà créé une image
+    if (req.file?.filename) {
+
+      const imagePath = path.join(
+        __dirname,
+        '../images',
+        req.file.filename
+      );
+
+      try {
+        await fs.promises.unlink(imagePath);
+        console.log('Image supprimée après échec de création');
+      } catch (unlinkError) {
+        console.error(
+          'Impossible de supprimer l’image :',
+          unlinkError
+        );
+      }
+    }
+
+    return res.status(400).json({ error });
+  }
 };
 /**
  * Et ici on retrouve exactement le fonctionnement que nous avions étudié
@@ -53,24 +80,72 @@ exports.getBestRatedBooks = (req, res, next) => {
     });
 };
 
-exports.modifyBook = (req, res, next) => {
-  const bookObject = req.file ? { ...JSON.parse(req.body.book), 
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` }
-        : { ...req.body };
+exports.modifyBook = async (req, res, next) => {
+  try {
+    const book = await Book.findOne({ _id: req.params.id });
 
-  delete bookObject.userId;
-  delete bookObject._id;
+    if (!book) {
+      return res.status(404).json({
+        message: 'Livre non trouvé'
+      });
+    }
 
-  Book.findOne({ _id: req.params.id })
-    .then(book => {
-      if (book.userId !== req.auth.userId) {
-          return res.status(403).json({ message: 'Unauthorized request' });
-      }                 // Attention code suivante manque userid !!!
-      Book.updateOne ({ _id: req.params.id }, { ...bookObject, _id: req.params.id } )
-        .then(() => { res.status(200).json({ message: 'Livre modifié !' }); })
-        .catch(error => { res.status(400).json({ error }); });
-    })
-    .catch(error => { res.status(400).json({ error }); });
+    // Vérification du propriétaire
+    if (book.userId !== req.auth.userId) {
+      return res.status(403).json({
+        message: 'Requête non autorisée'
+      });
+    }
+
+    let bookObject;
+
+    if (req.file) {
+        bookObject = {
+          ...JSON.parse(req.body.book),
+          imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        };
+
+      // Récupération du nom de l'ancienne image
+      const oldFilename = book.imageUrl.split('/images/')[1];
+
+      const oldImagePath = path.join(
+        __dirname,
+        '../images',
+        oldFilename
+      );
+
+      // Suppression de l'ancienne image
+      fs.unlink(oldImagePath, (error) => {
+        if (error) {
+          console.log(
+            'Impossible de supprimer ancienne image :',
+            error
+          );
+        } else {
+          console.log('Ancienne image supprimée');
+        }
+      });
+
+    } else {
+      bookObject = {
+        ...req.body
+      };
+    }
+
+    delete bookObject.userId;
+
+    await Book.updateOne(
+      { _id: req.params.id },
+      { ...bookObject, _id: req.params.id }
+    );
+
+    return res.status(200).json({
+      message: 'Livre modifié !'
+    });
+
+  } catch (error) {
+    return res.status(400).json({ error });
+  }
 };
 
 exports.deleteBook = (req, res, next) => {
@@ -96,16 +171,13 @@ exports.deleteBook = (req, res, next) => {
 
       // Supprimer l'image du dossier images
       fs.unlink(imagePath, (error) => {
-      if (error) {
-        // Supprimer ensuite le livre dans MongoDB
-          console.log('ERREUR UNLINK =', error);
-        } else {
-          console.log('IMAGE SUPPRIMÉE');
+        if (error) {
+          // Supprimer ensuite le livre dans MongoDB
+            console.log('ERREUR UNLINK =', error);
         }
 
         Book.deleteOne({ _id: req.params.id })
           .then((result) => {
-            console.log('DELETE RESULT =', result);
             res.status(200).json({
               message: 'Livre supprimé !'
             });
@@ -116,7 +188,7 @@ exports.deleteBook = (req, res, next) => {
           });
       });
       return null;
-    })
+    }) //then(book)
     .catch(error => {
       console.log('ERREUR FINDONE =', error);
       res.status(400).json({ error });

@@ -62,7 +62,6 @@ function Book() {
   };
 
   const loadingContent = (<h1>Chargement ...</h1>);
-
   const bookContent = !loading && !book.delete ? (
     <div>
       <div className={styles.Book}>

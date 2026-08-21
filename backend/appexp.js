@@ -2,9 +2,9 @@ const express = require('express');
 
 const helmet = require('helmet'); // Pour sécuriser davantage en-tête Http
 
-const appexp = express();
+const multer = require('multer'); //Si File > 4Mo (fin du module appexp)
 
-require('dotenv').config();
+const appexp = express();
 
 const path = require('path');
 
@@ -14,7 +14,11 @@ const userRoutes = require('./routes/user');
 
 const mongoose = require('mongoose');
 
-mongoose.connect(process.env.MONGODB_URL)
+require('dotenv').config({
+  path: path.join(__dirname, '../.env')
+});
+
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch((error) => {
   console.log('Connexion à MongoDB échouée !');
@@ -39,5 +43,24 @@ appexp.use(helmet());
 appexp.use('/api/books', bookRoutes);
 appexp.use('/api/auth', userRoutes);
 
+appexp.use((err, req, res, next) => {
+
+  if (err instanceof multer.MulterError) {
+
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        message: 'L’image ne doit pas dépasser 4 Mo'
+      });
+    }
+
+    return res.status(400).json({
+      message: 'Erreur lors du téléchargement de l’image'
+    });
+  }
+
+  return res.status(500).json({
+    message: 'Erreur interne du serveur'
+  });
+});
 
 module.exports = appexp;
