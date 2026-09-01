@@ -24,7 +24,5 @@ router.delete( '/:id', auth, bookCtrl.deleteBook );
 router.post('/:id/rating', auth, bookCtrl.rateBook);
 
 module.exports = router;
-/**
- * Remarque importante : mettre : router.get('/bestrating', ...) 
- * avant router.get('/:id', ...) sinon Express pourrait interpréter bestrating comme un id.
- */
+/** Remarque importante ::: Mettre : router.get('/bestrating', ...) avant 
+router.get('/:id', ...) sinon Express pourrait interpréter bestrating comme un id. */

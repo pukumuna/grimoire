@@ -12,6 +12,7 @@ exports.createBook = async (req, res, next) => {
 
     delete bookObject._id;
 
+    /**L'opérateur spread ... est utilisé pour faire une copie de tous les éléments de req.body */
     const book = new Book({
       ...bookObject,
       userId: req.auth.userId,
@@ -41,10 +42,7 @@ exports.createBook = async (req, res, next) => {
         await fs.promises.unlink(imagePath);
         console.log('Image supprimée après échec de création');
       } catch (unlinkError) {
-        console.error(
-          'Impossible de supprimer l’image :',
-          unlinkError
-        );
+        console.error( 'Impossible de supprimer l’image :', unlinkError );
       }
     }
 
@@ -56,10 +54,21 @@ exports.createBook = async (req, res, next) => {
  * Frontend React -> FormData -> book = JSON.stringify(...) + image = fichier -> Multer
  * -> req.body.book + req.file -> JSON.parse(req.body.book) [-> signifie : ensuite]
  */
+
 exports.getOneBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
-    .then(book => { res.status(200).json(book); })
-    .catch(error => { res.status(404).json({ error }); });
+    .then(book => {
+      if (!book) {
+        return res.status(404).json({
+          message: 'Livre non trouvé'
+        });
+      }
+
+      return res.status(200).json(book);
+    })
+    .catch(error => {
+      return res.status(400).json({ error });
+    });
 };
 
 exports.getAllBooks = (req, res, next) => {
@@ -195,49 +204,52 @@ exports.deleteBook = (req, res, next) => {
     });
 };
 
-exports.rateBook = (req, res, next) => {
-  const userId = req.auth.userId;
-  const rating = Number(req.body.rating);
+exports.rateBook = async (req, res) => {
+  try {
+    const userId = req.auth.userId;
+    const rating = Number(req.body.rating);
 
-  if (rating < 0 || rating > 5) {
-    return res.status(400).json({
-      message: 'La note doit être comprise entre 0 et 5'
-    });
-  }
-
-  Book.findOne({ _id: req.params.id })
-    .then(book => {
-      const alreadyRated = book.ratings.some(
-        item => item.userId === userId
-      );
-
-      if (alreadyRated) {
-        return res.status(400).json({
-          message: 'Vous avez déjà noté ce livre'
-        });
-      }
-
-      book.ratings.push({
-        userId,
-        grade: rating
+    if (Number.isNaN(rating) || rating < 0 || rating > 5) {
+      return res.status(400).json({
+        message: 'La note doit être comprise entre 0 et 5'
       });
+    }
 
-      const total = book.ratings.reduce(
-        (sum, item) => sum + item.grade,
-        0
-      );
+    const book = await Book.findOne({ _id: req.params.id });
 
-      book.averageRating =
-        total / book.ratings.length;
+    if (!book) {
+      return res.status(404).json({
+        message: 'Livre non trouvé'
+      });
+    }
 
-      return book.save();
-    })
-    .then(book => {
-      if (book) {
-        res.status(200).json(book);
-      }
-    })
-    .catch(error => {
-      res.status(400).json({ error });
+    const alreadyRated = book.ratings.some(
+      item => item.userId === userId
+    );
+
+    if (alreadyRated) {
+      return res.status(400).json({
+        message: 'Vous avez déjà noté ce livre'
+      });
+    }
+
+    book.ratings.push({
+      userId,
+      grade: rating
     });
+
+    const total = book.ratings.reduce(
+      (sum, item) => sum + item.grade,
+      0
+    );
+
+    book.averageRating = total / book.ratings.length;
+
+    const savedBook = await book.save();
+
+    return res.status(200).json(savedBook);
+
+  } catch (error) {
+    return res.status(400).json({ error });
+  }
 };

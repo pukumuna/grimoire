@@ -2,9 +2,8 @@ const jwt = require('jsonwebtoken');
 
 const path = require('path')
 
-require('dotenv').config();
 require('dotenv').config({
-  path: path.join(__dirname, '../middlewares/.env')
+  path: path.join(__dirname, '../../.env')
 });
 
 module.exports = (req, res, next) => {
@@ -19,7 +18,7 @@ module.exports = (req, res, next) => {
 
     next();
 
-  } catch (error) { console.log('ERREUR AUTH =', error);res.status(401).json({ error }); }
+  } catch (error) { console.log('ERREUR AUTH =', error); res.status(401).json({ error }); }
 };
 /**C'est ce middleware qui récupère : 
  * Authorization: Bearer eyJhbGciOi...
