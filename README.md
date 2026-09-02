@@ -1,4 +1,6 @@
 # Mon vieux Grimoire ( Il doit être lancé sur backend et sur frontend)
+Il faut avant toute chose vérifier qu'on dispose du fichier Environnement (.env) qui contient les paramètres
+de l'application Grimoire. Ce fichier est à mettre dans l'arborescence du projet, mais à l'exterieur du repertoire (ou dossier) backend. 
 ## Comment lancer le projet sur le fronted ? ### Avec npm ?
 Faites la commande `npm install` pour installer les dépendances puis `npm start`pour lancer le projet sur /mnt/c/Users/HP/OCROOM/projet-backend/grimoire. 
 
