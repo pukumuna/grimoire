@@ -14,10 +14,6 @@ const userRoutes = require('./routes/user');
 
 const mongoose = require('mongoose');
 
-require('dotenv').config({
-  path: path.join(__dirname, '../.env')
-});
-
 mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch((error) => {

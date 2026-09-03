@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const path = require('path')
 
-require('dotenv').config({
+require('dotenv').config({ // mise à disposition variables d'environnement
   path: path.join(__dirname, '../../.env')
 });
 
@@ -20,7 +20,5 @@ module.exports = (req, res, next) => {
 
   } catch (error) { console.log('ERREUR AUTH =', error); res.status(401).json({ error }); }
 };
-/**C'est ce middleware qui récupère : 
- * Authorization: Bearer eyJhbGciOi...
- * et produit : req.auth.userId
- */
+/**C'est ce middleware qui récupère : Authorization: Bearer eyJhbGciOi...
+ * et produit : req.auth.userId  */
