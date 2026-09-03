@@ -25,12 +25,12 @@ mongoose.connect(process.env.MONGODB_URI)
   console.error(error);
 });
 
-appexp.use(express.json()); /* Pour gérer la requête POST venant de l'application front-end, 
-on a besoin d'en extraire le corps JSON. Pour cela, vous avez juste besoin de ce middleware 
-très simple, mis à disposition par le framework Express. Avec ceci Express prend toutes 
+appexp.use(express.json()); /* Pour gérer la requête POST on a besoin d'en extraire 
+le corps JSON. Pour cela, on a juste besoin de ce middleware très simple, 
+mis à disposition par le framework Express. Avec ceci Express prend toutes 
 les requêtes qui ont comme Content-Type <application/json> et met à disposition leur 
-<body> directement sur l'objet req [app.post('/api/stuff', (req, res, next) => {
- console.log(req.body); : console.log(req.body)) res.status(201).json({ mess: .'Obj ...'] */
+<body> directement sur l'objet req [exemple : app.post('/api/stuff', (req, res, next) 
+=> {  console.log(req.body); ...] */
 
 appexp.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
