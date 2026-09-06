@@ -8,24 +8,17 @@ module.exports = async (req, res, next) => {
 
     const filename =
       `${Date.now()}-${req.file.originalname
-        .split(' ')
-        .join('_')
-        .replace(/\.[^/.]+$/, '')}.webp`;
+        .split(' ').join('_').replace(/\.[^/.]+$/, '')}.webp`;
 
     await sharp(req.file.buffer)
-      .resize({
-        width: 1200,
-        withoutEnlargement: true
-      })
-      .webp({
-        quality: 80
-      })
-      .toFile(`images/${filename}`);
+      .resize({ width: 1200, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toFile(`images/${filename}`); // stockage image dans le dossier images
 
     req.file.filename = filename;
 
     next();
   } catch (error) {
-    next(error);
+      next(error); // Voire : appexp.use((error, req, res, next) => { ... }
   }
 };

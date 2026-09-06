@@ -28,25 +28,22 @@ exports.createBook = async (req, res, next) => {
     });
 
   } catch (error) {
-
+    let messlib = "Livre non enregistré, échec de création dans DB ! ";
     // Si Sharp avait déjà créé une image
     if (req.file?.filename) {
 
-      const imagePath = path.join(
-        __dirname,
-        '../images',
-        req.file.filename
-      );
+      const imagePath = path.join( __dirname, '../images', req.file.filename );
 
       try {
         await fs.promises.unlink(imagePath);
-        console.log('Image supprimée après échec de création');
+        messlib +=' / image supprimée du FileSystem';
       } catch (unlinkError) {
-        console.error( 'Impossible de supprimer l’image :', unlinkError );
+        messlib +=' / Impossible de supprimer image du FileSystem';
+        console.error( 'Impossible de supprimer image du FileSystem', unlinkError );
       }
     }
 
-    return res.status(400).json({ error });
+    return res.status(500).json({ message : messlib, error });
   }
 };
 /**
@@ -67,14 +64,14 @@ exports.getOneBook = (req, res, next) => {
       return res.status(200).json(book);
     })
     .catch(error => {
-      return res.status(400).json({ error });
+      return res.status(500).json({ error });
     });
 };
 
 exports.getAllBooks = (req, res, next) => {
   Book.find()
     .then(books => { res.status(200).json(books); })
-    .catch(error => { res.status(400).json({ error }); });
+    .catch(error => { res.status(500).json({ error }); });
 };
 
 exports.getBestRatedBooks = (req, res, next) => {
@@ -85,7 +82,7 @@ exports.getBestRatedBooks = (req, res, next) => {
       res.status(200).json(books);
     })
     .catch(error => {
-      res.status(400).json({ error });
+      res.status(500).json({ error });
     });
 };
 
@@ -122,13 +119,8 @@ exports.modifyBook = async (req, res, next) => {
       // Suppression de l'ancienne image du dossier images
       fs.unlink(oldImagePath, (error) => {
         if (error) {
-          console.log(
-            'Impossible de supprimer ancienne image :',
-            error
-          );
-        } else {
-          console.log('Ancienne image supprimée');
-        }
+          console.error( 'Impossible de supprimer ancienne image :', error );
+        } 
       });
 
     } else {
@@ -149,7 +141,7 @@ exports.modifyBook = async (req, res, next) => {
     });
 
   } catch (error) {
-    return res.status(400).json({ error });
+    return res.status(500).json({ message: 'Livre non modifié !', error });
   }
 };
 
@@ -159,15 +151,11 @@ exports.deleteBook = (req, res, next) => {
     .then(book => {   
       // Vérifier que le livre existe
       if (!book) {
-        return res.status(404).json({
-          message: 'Livre non trouvé'
-        });
+        return res.status(404).json({ message: 'Livre non trouvé' });
       }
       // Vérifier que l'utilisateur connecté est bien le propriétaire
       if (book.userId !== req.auth.userId) {
-        return res.status(403).json({
-          message: 'Unauthorized request'
-        });
+        return res.status(403).json({ message: 'Unauthorized request' });
       }
 
       // Récupérer le nom du fichier image depuis imageUrl
@@ -176,27 +164,24 @@ exports.deleteBook = (req, res, next) => {
 
       // Supprimer l'image du dossier images
       fs.unlink(imagePath, (error) => {
-        if (error) {
-          // Supprimer ensuite le livre dans MongoDB
-            console.log('ERREUR UNLINK =', error);
+        
+        if (error) { 
+            return res.status(500).json({  // Ne pas Supprimer le livre dans MongoDB
+            message: "Impossible de supprimer l'image", error });
         }
 
         Book.deleteOne({ _id: req.params.id })
-          .then((result) => {
-            res.status(200).json({
-              message: 'Livre supprimé !'
-            });
+          .then(() => {
+            return res.status(200).json({ message: 'Livre supprimé !' });
           })
           .catch(error => {
-            console.log('ERREUR DELETE MONGO =', error);
-            res.status(400).json({ error });
+            return res.status(500).json({ message: 'ERREUR DELETE MONGO ' , error });
           });
       });
-      return null;
+      
     }) //then(book)
     .catch(error => {
-      console.log('ERREUR FINDONE =', error);
-      res.status(400).json({ error });
+      res.status(500).json({  message: 'ERREUR FindOne MONGO ', error });
     });
 };
 
@@ -214,9 +199,7 @@ exports.rateBook = async (req, res) => {
     const book = await Book.findOne({ _id: req.params.id });
 
     if (!book) {
-      return res.status(404).json({
-        message: 'Livre non trouvé'
-      });
+      return res.status(404).json({ message: 'Livre non trouvé' });
     }
 
     const alreadyRated = book.ratings.some(
@@ -229,14 +212,11 @@ exports.rateBook = async (req, res) => {
       });
     }
 
-    book.ratings.push({
-      userId,
-      grade: rating
+    book.ratings.push({ userId, grade: rating
     });
 
     const total = book.ratings.reduce(
-      (sum, item) => sum + item.grade,
-      0
+      (sum, item) => sum + item.grade, 0
     );
 
     book.averageRating = total / book.ratings.length;
@@ -246,6 +226,6 @@ exports.rateBook = async (req, res) => {
     return res.status(200).json(savedBook);
 
   } catch (error) {
-    return res.status(400).json({ error });
+    return res.status(500).json({ message: 'Erreur lors de la notation du livre', error });
   }
 };

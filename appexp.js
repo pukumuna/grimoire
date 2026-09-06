@@ -1,6 +1,7 @@
-const express = require('express');
 
 const helmet = require('helmet'); // Pour sécuriser davantage en-tête Http
+
+const express = require('express');
 
 const multer = require('multer'); //Si File > 4Mo (fin du module appexp)
 

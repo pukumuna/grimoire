@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
 
     const userId = decodedToken.userId;
 
-    req.auth = {userId: userId };
+    req.auth = {userId: userId }; // ajout propriété userid à objet req
 
     next();
 
